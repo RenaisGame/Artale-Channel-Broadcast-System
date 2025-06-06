@@ -135,9 +135,9 @@ function updateHighlightDisplay() {
     .map(k => {
       const icon = k.notify ? "🔔" : "🔕";
       const mode = k.mode || "任意";
-      return `[${mode}]${k.text.trim()}${icon}`;
+      return `[${mode}] ${k.text.trim()} ${icon}`;
     });
-  highlightWordsDisplay.textContent = words.join(", ") || "無";
+  highlightWordsDisplay.textContent = words.join(",  ") || "無";
 }
 
 loadSettings();

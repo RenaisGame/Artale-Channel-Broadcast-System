@@ -19,7 +19,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      max-height: 85vh;
+      max-height: 80vh;
       overflow-y: auto;
     }
     .msg-card {
@@ -93,13 +93,30 @@
     <div>關鍵字: <span id="highlighted-words"></span></div>
   </div>
   <div id="log"></div>
+  <div id="resumeScrollTip" style="
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #ffd700;
+    padding: 8px 16px;
+    border-radius: 6px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: none;
+    z-index: 1001;
+    font-size: 0.85em;
+  ">
+    🔽 有新訊息，點此跳到底部
+  </div>
   <div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
     <div style="background:#1f1f1f; padding:20px 30px; border-radius:8px; width:500px; box-shadow:0 0 10px #000;">
       <h3 style="margin-top:0; color:#00ffd0;">設定</h3>
       <label for="maxLogsInput" style="font-size:0.9em;">最多保留訊息數：</label>
       <input id="maxLogsInput" type="number" min="1" value="500" style="width:100%; margin-top:8px; margin-bottom:16px; padding:6px; background:#121212; border:1px solid #555; color:#eee; border-radius:4px;" />
       <div style="margin-bottom: 16px;">
-        <div style="font-size: 0.9em; margin-bottom: 6px;">高亮關鍵字：</div>
+        <div style="font-size: 0.9em; margin-bottom: 6px;">關鍵字：</div>
         <div id="keywordInputs" style="display: flex; flex-direction: column; gap: 8px;"></div>
         <button type="button" class="tag-button" style="margin-top: 8px;" onclick="addKeywordInput()">➕ 新增關鍵字</button>
       </div>
@@ -111,6 +128,8 @@
 
   <script>
     const logDiv = document.getElementById("log");
+    let isAutoScroll = true;
+    const resumeScrollTip = document.getElementById("resumeScrollTip");
     const ws = new WebSocket("ws://localhost:8765");
     const serverStatusDiv = document.getElementById("server-status");
 
@@ -165,11 +184,31 @@
       `;
 
       logDiv.appendChild(card);
-      logDiv.scrollTop = logDiv.scrollHeight;
+      if (isAutoScroll) {
+        logDiv.scrollTop = logDiv.scrollHeight;
+      } else {
+        resumeScrollTip.style.display = "block";
+      }
       if (logDiv.children.length >= MAX_LOGS) {
         logDiv.removeChild(logDiv.firstChild);
       }
     };
+
+    logDiv.addEventListener("scroll", () => {
+      const nearBottom = logDiv.scrollTop + logDiv.clientHeight >= logDiv.scrollHeight - 20;
+      if (nearBottom) {
+        isAutoScroll = true;
+        resumeScrollTip.style.display = "none";
+      } else {
+        isAutoScroll = false;
+      }
+    });
+
+    resumeScrollTip.addEventListener("click", () => {
+      isAutoScroll = true;
+      logDiv.scrollTop = logDiv.scrollHeight;
+      resumeScrollTip.style.display = "none";
+    });
 
     function copyToClipboard(text, el) {
       navigator.clipboard.writeText(text).then(() => {
