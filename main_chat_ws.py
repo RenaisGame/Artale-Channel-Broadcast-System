@@ -12,6 +12,7 @@ import websockets
 from queue import Queue
 import subprocess
 import webbrowser
+from collections import deque
 
 # ======== 設定 ========
 LIVE_CAPTURE = True
@@ -101,25 +102,36 @@ class ChatParser:
 
 # ======== WebSocket Server ========
 broadcast_queue = Queue()
+message_buffer = deque(maxlen=100)
 clients = set()
 
 async def websocket_handler(websocket):
     clients.add(websocket)
+    for msg in list(message_buffer):
+        try:
+            await websocket.send(msg)
+        except:
+            pass
     try:
-        while True:
-            msg = await asyncio.get_event_loop().run_in_executor(None, broadcast_queue.get)
-            for client in clients.copy():
-                try:
-                    await client.send(msg)
-                except:
-                    clients.remove(client)
+        await websocket.wait_closed()
     finally:
         clients.discard(websocket)
+
+async def broadcast_loop():
+    while True:
+        msg = await asyncio.get_event_loop().run_in_executor(None, broadcast_queue.get)
+        disconnected = set()
+        for client in clients.copy():
+            try:
+                await client.send(msg)
+            except:
+                disconnected.add(client)
+        clients.difference_update(disconnected)
 
 async def websocket_server():
     async with websockets.serve(websocket_handler, "0.0.0.0", WEBSOCKET_PORT):
         print(f"✅ WebSocket 推播伺服器啟動於 ws://localhost:{WEBSOCKET_PORT}")
-        await asyncio.Future()  # run forever
+        await broadcast_loop()
 
 # ======== Scapy Sniffer ========
 def handle_packet(pkt):
@@ -130,10 +142,16 @@ def handle_packet(pkt):
         size = int.from_bytes(payload[idx+4:idx+8], "little")
         if idx + 8 + size > len(payload): break
         blob = payload[idx:idx+8+size]
+        print(blob)
         try:
             parsed = ChatParser.parse_packet_bytes(blob)
+            if (len(parsed.keys()) > 2):
+                print(parsed)
             if parsed.get("Nickname") or parsed.get("Text"):
-                broadcast_queue.put(json.dumps(parsed, ensure_ascii=False))
+                msg_json = json.dumps(parsed, ensure_ascii=False)
+                broadcast_queue.put(msg_json)
+                message_buffer.append(msg_json)
+                print('success')
         except Exception as e:
             print(f"❌ 解析失敗：{e}")
         idx = payload.find(b"TOZ ", idx + 1)
