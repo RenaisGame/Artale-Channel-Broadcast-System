@@ -142,16 +142,12 @@ def handle_packet(pkt):
         size = int.from_bytes(payload[idx+4:idx+8], "little")
         if idx + 8 + size > len(payload): break
         blob = payload[idx:idx+8+size]
-        print(blob)
         try:
             parsed = ChatParser.parse_packet_bytes(blob)
-            if (len(parsed.keys()) > 2):
-                print(parsed)
             if parsed.get("Nickname") or parsed.get("Text"):
                 msg_json = json.dumps(parsed, ensure_ascii=False)
                 broadcast_queue.put(msg_json)
                 message_buffer.append(msg_json)
-                print('success')
         except Exception as e:
             print(f"❌ 解析失敗：{e}")
         idx = payload.find(b"TOZ ", idx + 1)
