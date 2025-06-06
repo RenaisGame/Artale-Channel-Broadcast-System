@@ -75,14 +75,22 @@
 </head>
 <body>
   <h2>📡 Artale 公共頻道外接系統</h2>
+  <div id="status" style="margin-bottom:10px; font-size:0.85em;"></div>
   <div id="log"></div>
 
   <script>
     const logDiv = document.getElementById("log");
     const ws = new WebSocket("ws://localhost:8765");
+    const statusDiv = document.getElementById("status");
 
-    ws.onopen = () => console.log("✅ WebSocket 連線成功");
-    ws.onclose = () => console.log("🔌 WebSocket 已關閉");
+    ws.onopen = () => {
+      console.log("✅ WebSocket 連線成功");
+      statusDiv.textContent = "🟢 已連線";
+    }
+    ws.onclose = () => {
+      console.log("🔌 WebSocket 已關閉");
+      statusDiv.textContent = "🔴 已斷線，請檢查服務端";
+    }
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
