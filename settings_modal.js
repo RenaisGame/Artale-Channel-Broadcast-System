@@ -2,6 +2,7 @@ const settingsBtn = document.getElementById("settingsBtn");
 const settingsModal = document.getElementById("settingsModal");
 const maxLogsInput = document.getElementById("maxLogsInput");
 const maxLogsDisplay = document.getElementById("max-logs-status");
+const highlightWordsDisplay = document.getElementById("highlighted-words");
 
 let MAX_LOGS = 3000;
 let keywordList = [];
@@ -105,6 +106,7 @@ function renderKeywordInputs() {
 function saveKeywords() {
   const cleaned = keywordList.map(k => ({text: k.text.trim(), notify: k.notify})).filter(k => Boolean(k.text));
   localStorage.setItem("highlight_keywords", JSON.stringify(cleaned));
+  updateHighlightDisplay();
 }
 
 function addKeywordInput() {
@@ -113,6 +115,16 @@ function addKeywordInput() {
   saveKeywords();
 }
 
+function updateHighlightDisplay() {
+  const words = keywordList
+    .map(k => {
+      const icon = k.notify ? "🔔" : "🔕";
+      return `${k.text}${icon}`;
+    });
+  highlightWordsDisplay.textContent = words.join(", ") || "無";
+}
+
 loadSettings();
+updateHighlightDisplay();
 window.closeSettings = closeSettings;
 window.addKeywordInput = addKeywordInput;
