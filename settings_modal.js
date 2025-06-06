@@ -4,6 +4,8 @@ const maxLogsInput = document.getElementById("maxLogsInput");
 const maxLogsDisplay = document.getElementById("max-logs-status");
 
 let MAX_LOGS = 3000;
+let keywordList = [];
+const keywordInput = document.getElementById("keywordListInput");
 
 function loadSettings() {
   const stored = localStorage.getItem("max_logs");
@@ -12,6 +14,12 @@ function loadSettings() {
     maxLogsInput.value = MAX_LOGS;
   }
   maxLogsDisplay.textContent = MAX_LOGS;
+
+  const storedKeywords = localStorage.getItem("highlight_keywords");
+  if (storedKeywords) {
+    keywordList = storedKeywords.split(",").map(k => k.trim()).filter(Boolean);
+    keywordInput.value = keywordList.join(", ");
+  }
 }
 
 settingsBtn.addEventListener("click", () => {
@@ -29,6 +37,11 @@ maxLogsInput.addEventListener("input", () => {
     localStorage.setItem("max_logs", val);
     maxLogsDisplay.textContent = val;
   }
+});
+
+keywordInput.addEventListener("input", () => {
+  keywordList = keywordInput.value.split(",").map(k => k.trim()).filter(Boolean);
+  localStorage.setItem("highlight_keywords", keywordList.join(","));
 });
 
 loadSettings();
