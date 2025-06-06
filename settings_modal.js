@@ -75,13 +75,15 @@ function renderKeywordInputs() {
       saveKeywords();
     });
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = item.notify === true;
-    checkbox.title = "收到訊息時通知我";
-    checkbox.addEventListener("change", () => {
-      keywordList[index].notify = checkbox.checked;
+    const bellBtn = document.createElement("button");
+    bellBtn.className = "tag-button";
+    bellBtn.innerHTML = item.notify ? "🔔" : "🔕";
+    bellBtn.style.color = item.notify ? "#ffd700" : "#888";
+    bellBtn.title = item.notify ? "點擊取消通知" : "點擊啟用通知";
+    bellBtn.addEventListener("click", () => {
+      keywordList[index].notify = !keywordList[index].notify;
       saveKeywords();
+      renderKeywordInputs();
     });
 
     const delBtn = document.createElement("button");
@@ -94,7 +96,7 @@ function renderKeywordInputs() {
     };
 
     div.appendChild(input);
-    div.appendChild(checkbox);
+    div.appendChild(bellBtn);
     div.appendChild(delBtn);
     keywordContainer.appendChild(div);
   });
