@@ -10,6 +10,8 @@ from pathlib import Path
 from scapy.all import AsyncSniffer, TCP
 import websockets
 from queue import Queue
+import subprocess
+import webbrowser
 
 # ======== 設定 ========
 LIVE_CAPTURE = True
@@ -139,5 +141,8 @@ def handle_packet(pkt):
 # ======== 主程式 ========
 if __name__ == "__main__":
     print(f">> 🟢 啟動 Sniffer 中（{BPF_FILTER}） ✅ 已啟動 MapleStory 聊天 WebSocket 推播器")
+    subprocess.Popen(["python3", "-m", "http.server", "8000"])
+    webbrowser.open("http://localhost:8000")
     threading.Thread(target=lambda: AsyncSniffer(filter=BPF_FILTER, prn=handle_packet, store=False).start(), daemon=True).start()
     asyncio.run(websocket_server())
+    
