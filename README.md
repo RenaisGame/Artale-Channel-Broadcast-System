@@ -2,6 +2,8 @@
 
 🎮 用於楓之谷 Artale 伺服器的公共聊天訊息外接系統。透過封包分析，自動解析 TCP 封包中的頻道、暱稱、訊息等資訊，並以 WebSocket 推播給網頁前端顯示。可用於自動顯示聊天、建立好友、整合直播視覺化。
 
+forked from: [steve07s/Artale-Channel-Broadcast-System](https://github.com/steve07s/Artale-Channel-Broadcast-System)
+
 ---
 
 ## ✅ 功能特色
@@ -15,23 +17,18 @@
 
 ---
 
-## 🔮 未來預計功能
-
-* 💾 儲存聊天紀錄至資料庫（本地或遠端）
-* 🔍 支援關鍵字快速搜尋（如：背包、賣、買）
-* 📈 建立歷史價格紀錄與交易統計分析
-* 🧭 Web 前端整合搜尋列、時間範圍與排序工具
----
-
 ## 🚀 安裝與啟動
 
-### 1. 安裝 Python 套件
+### 1. 安裝 Npcap (Window)
+https://npcap.com/#download
+
+### 2. 安裝 Python 套件
 
 ```bash
 pip install scapy websockets
-````
+```
 
-### 2. 啟動封包監聽 + WebSocket 廣播主程式
+### 3. 啟動封包監聽 + WebSocket 廣播主程式
 
 ```bash
 python main_chat_ws.py
@@ -43,10 +40,11 @@ python main_chat_ws.py
 >> 🟢 啟動 Sniffer 中（tcp port 32800） ✅ 已啟動 MapleStory 聊天 WebSocket 推播器
 ✅ WebSocket 推播伺服器啟動於 ws://localhost:8765
 ```
+同時自動打開前端展示頁
 
 ---
 
-## 🌐 前端展示頁（index.html）
+## 🌐 前端展示頁（http://localhost:8000）
 
 提供即時顯示聊天訊息、複製好友 ID 的網頁，範例如下：
 
@@ -54,19 +52,6 @@ python main_chat_ws.py
 
 ✔ 自動顯示訊息時間、頻道、暱稱、訊息內容
 ✔ 點擊「複製好友」可快速複製 `暱稱#UserId` 給他人加好友
-
----
-
-## 📂 專案結構
-
-```
-.
-├── main_chat_ws.py       # 封包監聽 + WebSocket 廣播主程式
-├── index.html            # 前端 UI（可直接開啟）
-├── thumbnail.png         # 畫面預覽截圖
-├── .gitignore            # Git 忽略清單
-└── README.md             # 專案說明文件
-```
 
 ---
 
