@@ -98,7 +98,6 @@
       <h3 style="margin-top:0; color:#00ffd0;">設定</h3>
       <label for="maxLogsInput" style="font-size:0.9em;">最多保留訊息數：</label>
       <input id="maxLogsInput" type="number" min="1" value="500" style="width:100%; margin-top:8px; margin-bottom:16px; padding:6px; background:#121212; border:1px solid #555; color:#eee; border-radius:4px;" />
-      <label for="keywordListInput" style="font-size:0.9em;">高亮關鍵字（用逗號分隔）：</label>
       <div style="margin-bottom: 16px;">
         <div style="font-size: 0.9em; margin-bottom: 6px;">高亮關鍵字：</div>
         <div id="keywordInputs" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -134,10 +133,23 @@
 
       const card = document.createElement("div");
       card.className = "msg-card";
-      const isHighlighted = keywordList.some(kw => text.includes(kw));
-      if (isHighlighted) {
+
+      let matchedKeywords = [];
+      let shouldNotify = false;
+      keywordList.forEach(kw => {
+        if (text.includes(kw.text)) {
+          matchedKeywords.push(kw.text);
+          if (kw.notify) {
+            shouldNotify = true;
+          }
+        }
+      });
+      if (matchedKeywords.length > 0) {
         card.style.borderColor = "#ffd700";
         card.style.boxShadow = "0 0 6px #ffd700";
+        if (shouldNotify && Notification.permission === "granted") {
+          new Notification(`匹配 [${matchedKeywords.join(', ')}]`, { body: `[${nick}] ${text}` });
+        }
       }
 
       card.innerHTML = `
@@ -169,7 +181,7 @@
 
     function highlightKeywords(text, keywords) {
       if (!keywords || keywords.length === 0) return text;
-      const escaped = keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const escaped = keywords.map(k => k.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
       const regex = new RegExp(`(${escaped.join("|")})`, "gi");
       return text.replace(regex, '<mark style="background-color:#fff59d; color:#000;">$1</mark>');
     }

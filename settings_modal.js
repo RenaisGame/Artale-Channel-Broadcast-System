@@ -17,15 +17,27 @@ function loadSettings() {
 
   const storedKeywords = localStorage.getItem("highlight_keywords");
   if (storedKeywords) {
-    keywordList = storedKeywords.split(",").map(k => k.trim()).filter(Boolean);
-  } else {
-    keywordList = [];
+    try {
+      const parsed = JSON.parse(storedKeywords);
+      keywordList = Array.isArray(parsed)
+        ? parsed.map(k => ({
+            text: typeof k === "string" ? k : k.text,
+            notify: typeof k === "object" && k.notify === true
+          }))
+        : [];
+    } catch {
+      keywordList = [];
+    }
   }
   renderKeywordInputs();
 }
 
 settingsBtn.addEventListener("click", () => {
   settingsModal.style.display = "flex";
+  const needsNotification = keywordList.some(k => k.notify === true);
+  if (needsNotification && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
 });
 
 function closeSettings() {
@@ -41,17 +53,17 @@ maxLogsInput.addEventListener("input", () => {
   }
 });
 
-
 function renderKeywordInputs() {
   keywordContainer.innerHTML = "";
-  keywordList.forEach((word, index) => {
+  keywordList.forEach((item, index) => {
     const div = document.createElement("div");
     div.style.display = "flex";
     div.style.gap = "8px";
-    
+    div.style.alignItems = "center";
+
     const input = document.createElement("input");
     input.type = "text";
-    input.value = word;
+    input.value = item.text || "";
     input.style.flex = "1";
     input.style.padding = "6px";
     input.style.background = "#121212";
@@ -59,7 +71,16 @@ function renderKeywordInputs() {
     input.style.color = "#eee";
     input.style.borderRadius = "4px";
     input.addEventListener("input", () => {
-      keywordList[index] = input.value.trim();
+      keywordList[index].text = input.value.trim();
+      saveKeywords();
+    });
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = item.notify === true;
+    checkbox.title = "收到訊息時通知我";
+    checkbox.addEventListener("change", () => {
+      keywordList[index].notify = checkbox.checked;
       saveKeywords();
     });
 
@@ -73,20 +94,19 @@ function renderKeywordInputs() {
     };
 
     div.appendChild(input);
+    div.appendChild(checkbox);
     div.appendChild(delBtn);
     keywordContainer.appendChild(div);
   });
 }
 
 function saveKeywords() {
-  const cleaned = keywordList.map(k => k.trim()).filter(Boolean);
-  console.log(cleaned)
-  localStorage.setItem("highlight_keywords", cleaned.join(","));
-  keywordList = cleaned;
+  const cleaned = keywordList.map(k => ({text: k.text.trim(), notify: k.notify})).filter(k => Boolean(k.text));
+  localStorage.setItem("highlight_keywords", JSON.stringify(cleaned));
 }
 
 function addKeywordInput() {
-  keywordList.push("");
+  keywordList.push({ text: "", notify: false });
   renderKeywordInputs();
   saveKeywords();
 }
