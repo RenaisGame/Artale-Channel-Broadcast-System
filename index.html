@@ -90,7 +90,7 @@
   </h2>
   <div id="status-bar">
     <div id="server-status"></div>
-    <div>最大訊息數: <span id="max-message-number"></span></div>
+    <div>最大訊息數: <span id="max-logs-status"></span></div>
   </div>
   <div id="log"></div>
   <div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
@@ -99,8 +99,7 @@
       <label for="maxLogsInput" style="font-size:0.9em;">最多保留訊息數：</label>
       <input id="maxLogsInput" type="number" min="1" value="500" style="width:100%; margin-top:8px; margin-bottom:16px; padding:6px; background:#121212; border:1px solid #555; color:#eee; border-radius:4px;" />
       <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button class="tag-button" onclick="closeSettings()">取消</button>
-        <button class="tag-button" onclick="saveSettings()">儲存</button>
+        <button class="tag-button" onclick="closeSettings()">關閉</button>
       </div>
     </div>
   </div>
@@ -111,11 +110,9 @@
     const serverStatusDiv = document.getElementById("server-status");
 
     ws.onopen = () => {
-      console.log("✅ WebSocket 連線成功");
       serverStatusDiv.textContent = "🟢 已連線";
     }
     ws.onclose = () => {
-      console.log("🔌 WebSocket 已關閉");
       serverStatusDiv.textContent = "🔴 已斷線，請檢查服務端";
     }
 
@@ -157,26 +154,7 @@
         setTimeout(() => el.textContent = original, 1200);
       });
     }
-
-    let MAX_LOGS = parseInt(localStorage.getItem("maxLogs") || "3000");
-    const maxMessageNumberSpan = document.getElementById("max-message-number");
-    maxMessageNumberSpan.textContent = MAX_LOGS;
-    document.getElementById("settingsBtn").onclick = () => {
-      document.getElementById("maxLogsInput").value = MAX_LOGS;
-      document.getElementById("settingsModal").style.display = "flex";
-    };
-    function closeSettings() {
-      document.getElementById("settingsModal").style.display = "none";
-    }
-    function saveSettings() {
-      const newLimit = parseInt(document.getElementById("maxLogsInput").value);
-      if (!isNaN(newLimit) && newLimit > 0) {
-        MAX_LOGS = newLimit;
-        localStorage.setItem("maxLogs", MAX_LOGS);
-        maxMessageNumberSpan.textContent = MAX_LOGS;
-      }
-      closeSettings();
-    }
   </script>
+  <script src="settings_modal.js"></script>
 </body>
 </html>
