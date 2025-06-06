@@ -23,7 +23,8 @@ function loadSettings() {
       keywordList = Array.isArray(parsed)
         ? parsed.map(k => ({
             text: typeof k === "string" ? k : k.text,
-            notify: typeof k === "object" && k.notify === true
+            notify: typeof k === "object" && k.notify === true,
+            mode: (k.mode === "收" || k.mode === "賣") ? k.mode : "任意"
           }))
         : [];
     } catch {
@@ -87,6 +88,19 @@ function renderKeywordInputs() {
       renderKeywordInputs();
     });
 
+    const select = document.createElement("select");
+    ["任意", "收", "賣"].forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      if (keywordList[index].mode === opt) option.selected = true;
+      select.appendChild(option);
+    });
+    select.addEventListener("change", () => {
+      keywordList[index].mode = select.value;
+      saveKeywords();
+    });
+
     const delBtn = document.createElement("button");
     delBtn.className = "tag-button";
     delBtn.textContent = "🗑️";
@@ -96,6 +110,7 @@ function renderKeywordInputs() {
       renderKeywordInputs();
     };
 
+    div.appendChild(select);
     div.appendChild(input);
     div.appendChild(bellBtn);
     div.appendChild(delBtn);
@@ -104,7 +119,7 @@ function renderKeywordInputs() {
 }
 
 function saveKeywords() {
-  const cleaned = keywordList.map(k => ({text: k.text.trim(), notify: k.notify})).filter(k => Boolean(k.text));
+  const cleaned = keywordList.map(k => ({...k, text: k.text.trim()})).filter(k => Boolean(k.text));
   localStorage.setItem("highlight_keywords", JSON.stringify(cleaned));
   updateHighlightDisplay();
 }
@@ -119,7 +134,8 @@ function updateHighlightDisplay() {
   const words = keywordList
     .map(k => {
       const icon = k.notify ? "🔔" : "🔕";
-      return `${k.text}${icon}`;
+      const mode = k.mode || "任意";
+      return `[${mode}]${k.text.trim()}${icon}`;
     });
   highlightWordsDisplay.textContent = words.join(", ") || "無";
 }

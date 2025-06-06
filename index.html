@@ -95,7 +95,7 @@
   </div>
   <div id="log"></div>
   <div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
-    <div style="background:#1f1f1f; padding:20px 30px; border-radius:8px; width:300px; box-shadow:0 0 10px #000;">
+    <div style="background:#1f1f1f; padding:20px 30px; border-radius:8px; width:500px; box-shadow:0 0 10px #000;">
       <h3 style="margin-top:0; color:#00ffd0;">設定</h3>
       <label for="maxLogsInput" style="font-size:0.9em;">最多保留訊息數：</label>
       <input id="maxLogsInput" type="number" min="1" value="500" style="width:100%; margin-top:8px; margin-bottom:16px; padding:6px; background:#121212; border:1px solid #555; color:#eee; border-radius:4px;" />
@@ -138,7 +138,7 @@
       let matchedKeywords = [];
       let shouldNotify = false;
       keywordList.forEach(kw => {
-        if (text.includes(kw.text)) {
+        if (text.includes(kw.text) && (kw.mode === "任意" || kw.mode == determineIntent(text, kw.text))) {
           matchedKeywords.push(kw.text);
           if (kw.notify) {
             shouldNotify = true;
@@ -185,6 +185,32 @@
       const escaped = keywords.map(k => k.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
       const regex = new RegExp(`(${escaped.join("|")})`, "gi");
       return text.replace(regex, '<mark style="background-color:#fff59d; color:#000;">$1</mark>');
+    }
+
+    const INDICATOR_GROUPS = {
+      賣: ["賣", "售"],
+      收: ["收", "徵", "買"]
+    };
+
+    function determineIntent(message, keyword, groups = INDICATOR_GROUPS) {
+      const keywordIndex = message.indexOf(keyword);
+      if (keywordIndex === -1) return null;
+
+      const beforeText = message.slice(0, keywordIndex);
+
+      let result = null;
+      let closestIndex = -1;
+
+      for (const [intent, indicators] of Object.entries(groups)) {
+        for (const word of indicators) {
+          const idx = beforeText.lastIndexOf(word);
+          if (idx !== -1 && idx > closestIndex) {
+            closestIndex = idx;
+            result = intent;
+          }
+        }
+      }
+      return result;
     }
   </script>
   <script src="settings_modal.js"></script>
