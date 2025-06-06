@@ -99,7 +99,11 @@
       <label for="maxLogsInput" style="font-size:0.9em;">最多保留訊息數：</label>
       <input id="maxLogsInput" type="number" min="1" value="500" style="width:100%; margin-top:8px; margin-bottom:16px; padding:6px; background:#121212; border:1px solid #555; color:#eee; border-radius:4px;" />
       <label for="keywordListInput" style="font-size:0.9em;">高亮關鍵字（用逗號分隔）：</label>
-<input id="keywordListInput" type="text" placeholder="例如: 卷軸, 警告" style="width:100%; margin-top:8px; margin-bottom:16px; padding:6px; background:#121212; border:1px solid #555; color:#eee; border-radius:4px;" />
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 0.9em; margin-bottom: 6px;">高亮關鍵字：</div>
+        <div id="keywordInputs" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        <button type="button" class="tag-button" style="margin-top: 8px;" onclick="addKeywordInput()">➕ 新增關鍵字</button>
+      </div>
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button class="tag-button" onclick="closeSettings()">關閉</button>
       </div>
