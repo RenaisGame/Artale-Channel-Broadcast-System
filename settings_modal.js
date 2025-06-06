@@ -125,7 +125,7 @@ function saveKeywords() {
 }
 
 function addKeywordInput() {
-  keywordList.push({ text: "", notify: false });
+  keywordList.push({ text: "", notify: false, mode: "任意" });
   renderKeywordInputs();
   saveKeywords();
 }
